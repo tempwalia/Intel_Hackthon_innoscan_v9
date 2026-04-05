@@ -1,0 +1,1 @@
+# This file is already included in the static directory

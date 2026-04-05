@@ -1,0 +1,40 @@
+2026-04-03 03:29:51,048 | INFO | 2459 | MainThread | ✅ Code generator loaded successfully
+2026-04-03 03:30:01,874 | INFO | 2536 | MainThread | ✅ Code generator loaded successfully
+2026-04-03 03:30:14,249 | INFO | 2536 | MainThread | ✅ POCRetriever initialized successfully
+2026-04-03 03:30:17,013 | INFO | 2536 | MainThread | ✅ Embeddings model loaded for ingestion
+2026-04-03 03:32:24,188 | INFO | 2819 | MainThread | ✅ Code generator loaded successfully
+2026-04-03 03:32:32,616 | INFO | 2819 | MainThread | ✅ POCRetriever initialized successfully
+2026-04-03 03:32:35,324 | INFO | 2819 | MainThread | ✅ Embeddings model loaded for ingestion
+2026-04-03 03:34:14,035 | INFO | 3290 | MainThread | ✅ Code generator loaded successfully
+2026-04-03 03:34:22,189 | INFO | 3290 | MainThread | ✅ POCRetriever initialized successfully
+2026-04-03 03:34:24,902 | INFO | 3290 | MainThread | ✅ Embeddings model loaded for ingestion
+2026-04-03 03:36:34,912 | INFO | 3290 | Thread-9 (process_request_thread) | [START] Similarity search started for title='Phishing Email Risk Detector'
+2026-04-03 03:36:36,370 | INFO | 3290 | Thread-9 (process_request_thread) | [DONE] Similarity search completed. Matches found: 0
+2026-04-03 03:36:36,371 | INFO | 3290 | Thread-9 (process_request_thread) | [INGEST] Starting Pinecone ingestion for POC 8c8b02ce
+2026-04-03 03:36:39,235 | INFO | 3290 | Thread-9 (process_request_thread) | ✅ POC ingested to Pinecone (POC ID: 8c8b02ce, 2 chunks)
+2026-04-03 03:36:39,237 | INFO | 3290 | Thread-18 (_generate) | [SRS] Boilerplate enabled=True for POC 8c8b02ce
+2026-04-03 03:36:39,238 | INFO | 3290 | Thread-18 (_generate) | [SRS] Generating SRS for POC 8c8b02ce
+2026-04-03 03:40:18,887 | INFO | 3290 | Thread-18 (_generate) | [SRS] Generation result success=True, output=/home/labuser/Downloads/intel-hackathon-v8-main/frontend/services/../../srs_gen/srs/8c8b02ce_SRS.md
+2026-04-03 03:40:18,887 | INFO | 3290 | Thread-18 (_generate) | ✅ ✅ SRS generated: 8c8b02ce_SRS.md
+2026-04-03 03:40:18,887 | INFO | 3290 | Thread-18 (_generate) | [SRS] File saved: /home/labuser/Downloads/intel-hackathon-v8-main/frontend/services/../../srs_gen/srs/8c8b02ce_SRS.md
+2026-04-03 03:40:18,887 | INFO | 3290 | Thread-18 (_generate) | [CODE] Triggering boilerplate code generation for POC 8c8b02ce
+2026-04-03 03:40:18,887 | INFO | 3290 | Thread-19 (_generate) | [CODE] Generating boilerplate code for POC 8c8b02ce
+2026-04-03 03:56:49,481 | INFO | 7810 | MainThread | ✅ Code generator loaded successfully
+2026-04-03 03:56:58,348 | INFO | 7810 | MainThread | ✅ POCRetriever initialized successfully
+2026-04-03 03:57:01,063 | INFO | 7810 | MainThread | ✅ Embeddings model loaded for ingestion
+2026-04-03 04:01:11,071 | INFO | 7810 | Thread-9 (process_request_thread) | [START] Similarity search started for title='Smart Energy Consumption Optimizer'
+2026-04-03 04:01:12,118 | INFO | 7810 | Thread-9 (process_request_thread) | [DONE] Similarity search completed. Matches found: 1
+2026-04-03 04:03:13,526 | INFO | 7810 | Thread-25 (process_request_thread) | [PROCESS] Started approved POC flow for idea_id=3fb51958
+2026-04-03 04:03:13,526 | INFO | 7810 | Thread-25 (process_request_thread) | 📁 Processing Approved POC (ID: 3fb51958)
+2026-04-03 04:03:13,527 | INFO | 7810 | Thread-25 (process_request_thread) | [INGEST] Starting Pinecone ingestion for POC 3fb51958
+2026-04-03 04:03:16,399 | INFO | 7810 | Thread-25 (process_request_thread) | ✅ POC ingested to Pinecone (POC ID: 3fb51958, 2 chunks)
+2026-04-03 04:03:16,400 | INFO | 7810 | Thread-25 (process_request_thread) | [PROCESS] Completed approved POC flow for poc_id=3fb51958 success=True
+2026-04-03 04:03:16,401 | INFO | 7810 | Thread-33 (_generate) | [SRS] Boilerplate enabled=True for POC 3fb51958
+2026-04-03 04:03:16,401 | INFO | 7810 | Thread-33 (_generate) | [SRS] Generating SRS for POC 3fb51958
+2026-04-03 04:06:48,361 | INFO | 7810 | Thread-33 (_generate) | [SRS] Generation result success=True, output=/home/labuser/Downloads/intel-hackathon-v8-main/frontend/services/../../srs_gen/srs/3fb51958_SRS.md
+2026-04-03 04:06:48,361 | INFO | 7810 | Thread-33 (_generate) | ✅ ✅ SRS generated: 3fb51958_SRS.md
+2026-04-03 04:06:48,361 | INFO | 7810 | Thread-33 (_generate) | [SRS] File saved: /home/labuser/Downloads/intel-hackathon-v8-main/frontend/services/../../srs_gen/srs/3fb51958_SRS.md
+2026-04-03 04:06:48,361 | INFO | 7810 | Thread-33 (_generate) | [CODE] Triggering boilerplate code generation for POC 3fb51958
+2026-04-03 04:06:48,362 | INFO | 7810 | Thread-35 (_generate) | [CODE] Generating boilerplate code for POC 3fb51958
+2026-04-03 04:22:51,649 | INFO | 7810 | Thread-35 (_generate) | ✅ ✅ Code generated successfully
+2026-04-03 04:22:51,650 | INFO | 7810 | Thread-35 (_generate) | [CODE] File saved: /home/labuser/Downloads/intel-hackathon-v8-main/frontend/services/../../code_gen/code/3fb51958_GENERATED_CODE.txt

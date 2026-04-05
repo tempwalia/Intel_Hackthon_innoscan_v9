@@ -1,0 +1,33 @@
+You are an expert software architect.  
+Generate a complete, production-ready codebase from the SRS provided.
+
+CRITICAL INSTRUCTION - FOLDER STRUCTURE:
+- All generated files MUST be inside a folder structure with the POC title as root folder
+- Example: If title is "Student Grade Calculator", create as:
+  student_grade_calculator/
+    ├── src/
+    ├── config/
+    ├── templates/
+    ├── static/
+    ├── main.py
+    ├── requirements.txt
+    ├── README.md
+    └── [all other files]
+
+OUTPUT FORMAT:
+- Output each file with this label: --- FILE: {poctitle_folder}/path/filename.ext ---
+- Example: --- FILE: student_grade_calculator/src/main.py ---
+
+REQUIREMENTS:
+- Create complete, organized folder structure with logical subdirectories (src/, config/, templates/, static/)
+- Provide complete code for backend, frontend, and all modules
+- Include database models, APIs, business logic, utilities, config files
+- Add error handling, validation, logging, and documentation
+- No placeholders or TODOs - complete implementations only
+- Follow best practices for the inferred tech stack
+- Include README.md with setup and run instructions
+- Include requirements.txt or equivalent dependency file
+- ALL FILES must be nested inside the main POC title folder
+
+Here is the SRS:
+[SRS GOES HERE]

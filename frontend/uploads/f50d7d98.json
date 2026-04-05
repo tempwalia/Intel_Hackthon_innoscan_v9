@@ -1,0 +1,19 @@
+{
+  "id": "f50d7d98",
+  "title": "POC Intake Form",
+  "description": "Use this form to submit a new idea. Fill all sections marked with * and press Submit.",
+  "problem": "Use this form to submit a new idea. Fill all sections marked with * and press Submit.",
+  "outcome": "Use this form to submit a new idea. Fill all sections marked with * and press Submit.",
+  "language": "pyhon ",
+  "approach": "Use this form to submit a new idea. Fill all sections marked with * and press Submit.",
+  "stack": "Use this form to submit a new idea. Fill all sections marked with * and press Submit.",
+  "complexity": "Medium",
+  "boilerplate_enabled": false,
+  "dev_count": 11,
+  "skills": [
+    "ML"
+  ],
+  "timeline": "12",
+  "manager": "ram123",
+  "submitted_by": "tikam"
+}

@@ -1,0 +1,13 @@
+2026-04-02 18:32:30,641 | INFO | 10698 | MainThread | ✅ Code generator loaded successfully
+2026-04-02 18:32:39,362 | INFO | 10698 | MainThread | ✅ POCRetriever initialized successfully
+2026-04-02 18:32:42,093 | INFO | 10698 | MainThread | ✅ Embeddings model loaded for ingestion
+2026-04-02 18:34:39,784 | INFO | 10698 | Thread-8 (process_request_thread) | [START] Similarity search started for title='POC Intake Form'
+2026-04-02 18:34:40,955 | INFO | 10698 | Thread-8 (process_request_thread) | [DONE] Similarity search completed. Matches found: 0
+2026-04-02 18:34:40,956 | INFO | 10698 | Thread-8 (process_request_thread) | [INGEST] Starting Pinecone ingestion for POC f50d7d98
+2026-04-02 18:34:44,167 | INFO | 10698 | Thread-8 (process_request_thread) | ✅ POC ingested to Pinecone (POC ID: f50d7d98, 2 chunks)
+2026-04-02 18:34:44,168 | INFO | 10698 | Thread-17 (_generate) | [SRS] Boilerplate enabled=False for POC f50d7d98
+2026-04-02 18:34:44,169 | INFO | 10698 | Thread-17 (_generate) | [SRS] Generating SRS for POC f50d7d98
+2026-04-02 18:38:15,806 | INFO | 10698 | Thread-17 (_generate) | [SRS] Generation result success=True, output=/home/labuser/Downloads/intel-hackathon-v8-main/frontend/services/../../srs_gen/srs/f50d7d98_SRS.md
+2026-04-02 18:38:15,806 | INFO | 10698 | Thread-17 (_generate) | ✅ ✅ SRS generated: f50d7d98_SRS.md
+2026-04-02 18:38:15,806 | INFO | 10698 | Thread-17 (_generate) | [SRS] File saved: /home/labuser/Downloads/intel-hackathon-v8-main/frontend/services/../../srs_gen/srs/f50d7d98_SRS.md
+2026-04-02 18:38:15,806 | INFO | 10698 | Thread-17 (_generate) | ⏭️  Boilerplate code generation disabled for POC f50d7d98

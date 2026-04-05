@@ -1,0 +1,19 @@
+{
+  "id": "35d803a0",
+  "title": "Task Tracker Web App",
+  "description": "Simple web app to add, view, and delete daily tasks",
+  "problem": "People need an easy way to track small tasks without using complex tools",
+  "outcome": "A basic task tracker with create and delete functionality running in the browser",
+  "language": "Javascript",
+  "approach": "Build a simple frontend using HTML, CSS, and JavaScript with local storage to save tasks.\"",
+  "stack": "JavaScript, HTML, CSS",
+  "complexity": "Low",
+  "boilerplate_enabled": true,
+  "dev_count": 1,
+  "skills": [
+    "Frontend"
+  ],
+  "timeline": "2-5 days",
+  "manager": "shyaam123",
+  "submitted_by": "tikam"
+}

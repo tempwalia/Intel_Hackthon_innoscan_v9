@@ -1,0 +1,20 @@
+{
+  "id": "5da3829e",
+  "title": "Smart Energy Consumption Optimizer",
+  "description": "Predict and reduce office energy usage using IoT sensor data.",
+  "problem": "Facilities teams lack proactive insights to reduce peak energy costs.",
+  "outcome": "Dashboard with consumption forecasts, anomaly alerts, and optimization recommendations.",
+  "language": "python",
+  "approach": "Ingest sensor streams, train forecasting models, and trigger rule-based optimization suggestions.",
+  "stack": "Python, Pandas, Prophet, FastAPI, Streamlit",
+  "complexity": "Medium",
+  "boilerplate_enabled": true,
+  "dev_count": 1,
+  "skills": [
+    "ML",
+    "DevOps"
+  ],
+  "timeline": "10",
+  "manager": "ram123",
+  "submitted_by": "tikam"
+}

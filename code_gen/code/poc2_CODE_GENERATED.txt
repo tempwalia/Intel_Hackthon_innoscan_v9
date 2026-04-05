@@ -1,0 +1,105 @@
+It looks like you have a comprehensive set of requirements outlined in your DETAILED REQUIREMENTS section. Let's break down some key aspects:
+
+### 1. Project Overview
+- **Title:** Voice-Based Meeting Minutes Generator  
+  - This project aims to automate the creation of meeting minutes from recorded audio files.
+- **Description:** Converts meeting audio into structured minutes automatically.
+- **Problem Statement:** Manual minute writing is time-consuming and prone to errors.
+- **Expected Outcome:** Accurate, automated generated minutes with action items.
+- **Target Audience:** Managers, team leaders, or anyone needing quick access to meeting summaries.
+
+### 2. Functional Requirements
+- **Input Processing:** 
+  - **Audio File Upload:** Users can upload MP3 files containing recorded meetings.
+  - **Transcription Functionality:** Automatically transcribes audio into text using Whisper model.
+- **Core Engine:**
+  - **Summarization Module:** Utilizes Large Language Models (LLMs) to summarize meeting transcripts efficiently.
+  - **Action Item Extraction:** Identifies relevant action items based on speaker names and timestamps.
+  - **Format Conversion:** Generates formatted output in XML or CSV formats.
+- **API Endpoints:**
+  - `POST /generate`: Endpoint to initiate transcription and summary generation process.
+  - `GET /transcript/<audio_file_id>`: Returns the uploaded audio file for manual review.
+  - `GET /minutes/<summary_id>`: Returns the generated minutes with action items.
+- **Output Format:**
+  - **XML Output:** Detailed minutes including action items and their corresponding timestamps.
+  - **CSV Output:** Simple, readable minutes without detailed timestamps but with action item descriptions.
+
+### 3. Non-functional Requirements
+- **Performance:** Less than 1 second per request response.
+- **Reliability:** Below 1% overall system failure rate.
+- **Data Integrity:** All data transmitted is encrypted and stored securely.
+
+### 4. Technical Architecture
+- **Stack:** Python, Whisper, Azure Storage, Streamlit.
+- **Components:**
+  - Web Application: Streamlit-based interface for users interact with.
+  - API Gateway: Handles incoming requests and routes them to appropriate endpoints.
+  - Database: Stores metadata about uploaded audio files and generated results.
+- **Model/Framework Details:**
+  - Speech Recognition: Uses Whisper model for accurate transcription.
+  - Natural Language Processing: Employed LLMs for efficient summarization and extraction of action items.
+
+### 5. API Specification
+- **Request Example:**
+  ```json
+  {
+      "action": "POST",
+      "method": "/generate",
+      "body": {
+          "audioFileId": "example_audio_123"
+      }
+  }
+  ```
+- **Response Example (XML):**
+  ```xml
+  <Minutes>
+      <MeetingDate>2023-10-01</MeetingDate>
+      <Participants>
+          <Participant>Name1</Participant>
+          <Participant>Name2</Participant>
+      </Participants>
+      <Summary>
+          <ActionItem>Document finalized within next week</ActionItem>
+      </Summary>
+  </Minutes>
+  ```
+- **Response Example (CSV):**
+  ```csv
+  Timestamp,Speaker,ActionItem
+  16:00,Name1,Review draft document
+  16:30,Name2,Update presentation slides
+  ```
+
+### 6. Data & Categories
+- **Predefined Classifications/Data Types:**
+  - **Categories:** Participants, Actions, Timestamps
+  - **Subcategories:** Speaker Names, Meeting Dates, Time Stamps
+
+### 7. Input Constraints
+- **Field Limits and Formats:**
+  - **Audio File ID:** Unique identifier for each uploaded audio file.
+  - **Participants:** List of participants’ names separated by commas.
+  - **Meeting Date:** YYYY-MM-DD format.
+  - **Time Stamp:** HH:mm format.
+
+### 8. Error Handling
+| Status Code | Description |
+|-------------|-------------|
+| 200         | Successful execution |
+| 400         | Audio file not found |
+| 500         | Internal server error |
+
+### 9. Acceptance Criteria
+1. The application successfully uploads an MP3 file.
+2. The system accurately transcribes the audio file into text.
+3. Action items are correctly identified and extracted from the transcript.
+4. Generated minutes are returned in either XML or CSV format.
+5. Latency does not exceed 1 second for any request.
+6. No errors occur during the entire processing cycle.
+
+### 10. Dependencies
+- **Python:** Version 3.x
+- **whisper:** Version 0.20.1
+- **azure-storage-blob:** Version 12.2.0
+
+This overview should help ensure that all necessary components and functionalities are covered for the successful implementation of the Voice-Based Meeting Minutes Generator. If you need further clarification on any part of these requirements or

@@ -1,0 +1,410 @@
+<think>
+Okay, I need to generate a complete codebase for the Smart Energy Consumption Optimizer based on the provided SRS. Let me start by understanding the requirements thoroughly.
+
+First, the project uses Python with FastAPI for the backend, Streamlit for the frontend, Pandas, NumPy, and Prophet for modeling. The main components are data ingestion, model training, anomaly detection, and a dashboard. The folder structure needs to be organized with src, config, templates, static, and other necessary directories.
+
+Let me outline the main files and directories. The root folder will be "smart_energy_consumption_optimizer". Inside, I'll have src for the main code, config for settings, templates and static for the frontend, and the main.py, requirements.txt, and README.md.
+
+For the backend, FastAPI will handle the API endpoints. The /ingest endpoint will receive sensor data, which needs to be validated against the constraints. Then, the data is stored in memory for model training. The /forecast and /recommendations endpoints will use Prophet for predictions and the rule engine for anomalies.
+
+The model training part: Prophet requires historical data. Since the data is stored in memory, I'll need to maintain a DataFrame that gets updated with each ingestion. The model should be retrained hourly, so I'll set up a background task using FastAPI's lifespan or a scheduler.
+
+For the rule engine, any power reading above 1000W is considered an anomaly. The recommendations are generated based on these anomalies, suggesting actions like adjusting HVAC settings.
+
+The frontend with Streamlit will display the dashboard. It needs to show time-series forecasts, anomaly alerts, and recommendations. I'll need to integrate the backend APIs into the Streamlit app, possibly using requests to fetch data.
+
+Now, considering the dependencies, I'll list all the required packages in requirements.txt. Also, the README.md should guide the user on setting up the environment and running the app.
+
+Error handling is crucial. For the /ingest endpoint, I need to validate the incoming JSON data against the constraints. If any field is invalid, return a 400 error with details. For internal server errors, log them and handle retries. Rate limiting with 429 status code should be implemented using FastAPI's dependencies.
+
+The data model will be a DataFrame in memory. Each ingestion adds a new row, and the model is retrained hourly. The Prophet model will be trained on the historical data, and forecasts will be generated for the next few hours.
+
+For the dashboard, Streamlit will fetch data from the backend APIs. The UI should have charts for forecasts, alerts, and recommendations. The alerts will be color-coded based on severity, and recommendations will be listed with timestamps.
+
+Testing the performance requirements: ensuring API responses are under 500ms. Since the model is retrained hourly, the inference should be fast enough. The system should handle 1000+ sensors, so the data ingestion and processing need to be efficient.
+
+Now, structuring the code. The main.py will start the FastAPI app and the Streamlit app. The src directory will have modules for data processing, models, and APIs. The config directory will have settings for the model and thresholds.
+
+Wait, the SRS mentions storing raw data in memory. So, I'll create a global DataFrame that accumulates data. The model training function will use this DataFrame to fit the Prophet model. The recommendations are generated based on the latest data, checking for power thresholds.
+
+For the Streamlit app, I'll create a separate script, maybe app.py, that uses Streamlit to display the dashboard. It will call the FastAPI endpoints to get forecasts and recommendations.
+
+I need to make sure all the endpoints are properly defined with correct request and response models. Using Pydantic models for data validation will help with the /ingest endpoint.
+
+Also, the error handling for invalid data should be detailed. For example, if the timestamp is not in ISO 8601 format, return a 400 error. Similarly, check device ID length and data ranges for power and temperature.
+
+The requirements.txt should include all the necessary packages, including the exact versions specified in the SRS. The README.md will guide the user on installing dependencies, running the backend, and the frontend.
+
+I should also consider logging for error tracking and monitoring. Using Python's logging module to log errors and model training details.
+
+Finally, the acceptance criteria: ensuring the dashboard displays real-time data, model accuracy is met, and the system scales. Testing these aspects would be part of the development process, but the code should be structured to support these requirements.
+
+Putting it all together, the codebase will have the backend APIs, the Streamlit frontend, data processing modules, and configuration files. Each part is interconnected, with the backend handling data ingestion and model training, and the frontend presenting the results.
+</think>
+
+--- FILE: smart_energy_consumption_optimizer/requirements.txt ---
+fastapi==0.95.0
+uvicorn==0.21.1
+pandas==2.0.3
+numpy==1.24.3
+prophet==1.1.1
+streamlit==1.26.0
+python-dotenv==0.21.1
+pydantic==2.3.1
+matplotlib==3.7.1
+plotly==5.18.0
+gunicorn==20.1.0
+python-multipart==0.0.5
+typing-extensions==4.5.0
+
+--- FILE: smart_energy_consumption_optimizer/README.md ---
+# Smart Energy Consumption Optimizer
+
+## Getting Started
+
+### Prerequisites
+- Python 3.9.12
+- Docker (optional for production deployment)
+
+### Installation
+1. Clone the repository
+2. Create a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate
+```
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+### Running the Application
+```bash
+# Start backend
+uvicorn main:app --reload
+
+# Start frontend
+streamlit run app.py
+```
+
+### API Documentation
+Swagger UI available at http://localhost:8000/docs
+
+## Features
+- Real-time energy consumption forecasting
+- Anomaly detection with threshold alerts
+- Optimization recommendations
+- Interactive dashboard with visualizations
+
+## Configuration
+Edit `.env` file to configure:
+- MODEL_TRAINING_INTERVAL (default: 3600 seconds)
+- ANOMALY_THRESHOLD (default: 1000W)
+
+--- FILE: smart_energy_consumption_optimizer/.env ---
+MODEL_TRAINING_INTERVAL=3600
+ANOMALY_THRESHOLD=1000
+
+--- FILE: smart_energy_consumption_optimizer/src/data_processor.py ---
+import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
+from typing import List, Dict, Any
+
+class DataProcessor:
+    def __init__(self):
+        self.raw_data = pd.DataFrame(columns=['timestamp', 'device_id', 'power', 'temperature'])
+        self.model = self._initialize_model()
+    
+    def _initialize_model(self):
+        """Initialize Prophet model with default parameters"""
+        from prophet import Prophet
+        return Prophet()
+    
+    def validate_data(self, data: Dict[str, Any]) -> bool:
+        """Validate incoming sensor data against constraints"""
+        try:
+            # Validate timestamp format
+            datetime.fromisoformat(data['timestamp'])
+            
+            # Validate device ID
+            if not (1 <= len(data['device_id']) <= 10 and data['device_id'].isalnum()):
+                return False
+                
+            # Validate power range
+            if not (0 <= data['power'] <= 1000):
+                return False
+                
+            # Validate temperature range
+            if not (-20 <= data['temperature'] <= 50):
+                return False
+                
+            return True
+            
+        except (ValueError, KeyError) as e:
+            return False
+    
+    def ingest_data(self, data: Dict[str, Any]) -> Dict[str, str]:
+        """Ingest and store sensor data"""
+        if not self.validate_data(data):
+            raise ValueError("Invalid data format")
+            
+        # Convert to DataFrame row
+        row = pd.DataFrame([{
+            'timestamp': data['timestamp'],
+            'device_id': data['device_id'],
+            'power': data['power'],
+            'temperature': data['temperature']
+        }])
+        
+        # Update raw data
+        self.raw_data = pd.concat([self.raw_data, row], ignore_index=True)
+        
+        # Train model with latest data
+        self._train_model()
+        
+        return {"status": "success", "message": "Data ingested"}
+    
+    def _train_model(self):
+        """Train Prophet model with historical data"""
+        if len(self.raw_data) < 100:
+            return  # Need at least 100 data points for training
+        
+        # Prepare training data
+        train_data = self.raw_data[['timestamp', 'power']]
+        train_data.columns = ['ds', 'y']
+        
+        # Fit model
+        self.model.fit(train_data)
+    
+    def get_forecast(self, hours: int = 24) -> List[Dict[str, float]]:
+        """Generate power consumption forecasts"""
+        future = self.model.make_future_dataframe(periods=hours*3600, freq='H')
+        forecast = self.model.predict(future)
+        
+        # Format forecast data
+        forecast_data = forecast[['ds', 'yhat']].rename(columns={'ds': 'timestamp', 'yhat': 'predicted_power'})
+        return forecast_data.to_dict('records')
+    
+    def get_recommendations(self) -> List[Dict[str, str]]:
+        """Generate optimization recommendations"""
+        recommendations = []
+        
+        # Check for anomalies in last hour
+        recent_data = self.raw_data[self.raw_data['timestamp'] > datetime.now() - timedelta(hours=1)]
+        
+        for _, row in recent_data.iterrows():
+            if row['power'] > self.ANOMALY_THRESHOLD:
+                severity = "high"
+                action = "Reduce HVAC power"
+                recommendations.append({
+                    "action": action,
+                    "severity": severity,
+                    "timestamp": row['timestamp']
+                })
+        
+        return recommendations
+
+--- FILE: smart_energy_consumption_optimizer/src/models.py ---
+from typing import Dict, Any
+from datetime import datetime, timedelta
+import pandas as pd
+from prophet import Prophet
+
+class EnergyModel:
+    def __init__(self):
+        self.processor = DataProcessor()
+        self.last_training_time = datetime.now()
+        
+    def train_model(self):
+        """Train model with latest data"""
+        self.processor._train_model()
+        self.last_training_time = datetime.now()
+    
+    def predict(self, hours: int = 24) -> Dict[str, Any]:
+        """Generate forecasts"""
+        forecast = self.processor.get_forecast(hours)
+        return {
+            "forecast": forecast,
+            "last_training_time": self.last_training_time.isoformat()
+        }
+
+--- FILE: smart_energy_consumption_optimizer/src/api.py ---
+from fastapi import FastAPI, HTTPException, Depends
+from pydantic import BaseModel
+from typing import List, Dict, Any
+from datetime import datetime
+import uvicorn
+from src.data_processor import DataProcessor
+from src.models import EnergyModel
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+app = FastAPI(title="Smart Energy Consumption Optimizer")
+
+# Initialize components
+data_processor = DataProcessor()
+energy_model = EnergyModel()
+
+class SensorData(BaseModel):
+    timestamp: str
+    device_id: str
+    power: float
+    temperature: float
+
+@app.post("/ingest")
+async def ingest_sensor_data(data: SensorData):
+    """Ingest sensor data for processing"""
+    try:
+        response = data_processor.ingest_data(data.dict())
+        return response
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/forecast")
+async def get_forecast(hours: int = 24):
+    """Get power consumption forecasts"""
+    forecast = energy_model.predict(hours)
+    return forecast
+
+@app.get("/recommendations")
+async def get_recommendations():
+    """Get optimization recommendations"""
+    recommendations = energy_model.predict(1)  # Get 1 hour forecast for recommendations
+    return {"recommendations": recommendations["forecast"]}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+--- FILE: smart_energy_consumption_optimizer/src/dashboard.py ---
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+from datetime import datetime, timedelta
+import requests
+from src.models import EnergyModel
+
+# Initialize model
+energy_model = EnergyModel()
+
+# Streamlit app
+st.set_page_config(page_title="Smart Energy Consumption Optimizer", layout="wide")
+
+# Sidebar
+st.sidebar.header("Energy Dashboard")
+forecast_hours = st.sidebar.slider("Forecast Hours", min_value=1, max_value=24, value=24)
+
+# Main content
+st.title("Smart Energy Consumption Optimizer")
+st.markdown("### Real-time Energy Monitoring and Optimization")
+
+# Forecast chart
+forecast = energy_model.predict(forecast_hours)
+forecast_df = pd.DataFrame(forecast)
+fig = px.line(forecast_df, x='timestamp', y='predicted_power', title='Power Consumption Forecast')
+st.plotly_chart(fig, use_container_width=True)
+
+# Anomaly alerts
+st.markdown("### Anomaly Alerts")
+alerts = energy_model.predict(1)  # Get 1 hour forecast for alerts
+for alert in alerts["forecast"]:
+    severity = "high" if alert["predicted_power"] > float(os.getenv("ANOMALY_THRESHOLD", 1000)) else "medium"
+    st.markdown(f"⚠️ {severity} Alert: {alert['timestamp']} - {alert['predicted_power']}W")
+
+# Recommendations
+st.markdown("### Optimization Recommendations")
+recommendations = energy_model.predict(1)
+for rec in recommendations["forecast"]:
+    st.markdown(f"💡 {rec['timestamp']} - {rec['predicted_power']}W: {rec['action']}")
+
+--- FILE: smart_energy_consumption_optimizer/app.py ---
+import streamlit as st
+import os
+from src.dashboard import main as dashboard_main
+
+if __name__ == "__main__":
+    os.environ["STREAMLIT_SERVER_PORT"] = "8501"
+    dashboard_main()
+
+--- FILE: smart_energy_consumption_optimizer/main.py ---
+from fastapi import FastAPI
+from uvicorn import run
+from src.api import app as api_app
+
+if __name__ == "__main__":
+    run(api_app, host="0.0.0.0", port=8000)
+
+--- FILE: smart_energy_consumption_optimizer/config/settings.py ---
+import os
+
+class Settings:
+    MODEL_TRAINING_INTERVAL = int(os.getenv("MODEL_TRAINING_INTERVAL", 3600))
+    ANOMALY_THRESHOLD = float(os.getenv("ANOMALY_THRESHOLD", 1000))
+    FORECAST_HOURS = int(os.getenv("FORECAST_HOURS", 24))
+
+--- FILE: smart_energy_consumption_optimizer/templates/forecast.html ---
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Energy Forecast</title>
+</head>
+<body>
+    <h1>Power Consumption Forecast</h1>
+    <div id="forecast-chart"></div>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        const data = {{ forecast | tojson }};
+        const trace = {
+            x: data.map(d => d.timestamp),
+            y: data.map(d => d.predicted_power),
+            type: 'line'
+        };
+        const layout = { title: 'Power Consumption Forecast' };
+        Plotly.newPlot('forecast-chart', [trace], layout);
+    </script>
+</body>
+</html>
+
+--- FILE: smart_energy_consumption_optimizer/static/styles.css ---
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    color: #333;
+}
+
+#forecast-chart {
+    width: 100%;
+    height: 400px;
+    margin-top: 20px;
+}
+
+.alert {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+}
+
+.high {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.medium {
+    background-color: #ffa500;
+    color: white;
+}
+
+.recommendation {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    background-color: #e0f7fa;
+}

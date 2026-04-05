@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Energy Forecast</title>
+</head>
+<body>
+    <h1>Power Consumption Forecast</h1>
+    <div id="forecast-chart"></div>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+        const data = {{ forecast | tojson }};
+        const trace = {
+            x: data.map(d => d.timestamp),
+            y: data.map(d => d.predicted_power),
+            type: 'line'
+        };
+        const layout = { title: 'Power Consumption Forecast' };
+        Plotly.newPlot('forecast-chart', [trace], layout);
+    </script>
+</body>
+</html>

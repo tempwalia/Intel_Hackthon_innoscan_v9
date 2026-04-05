@@ -1,0 +1,304 @@
+---
+
+**FILE: voice_meeting_generator/backend/app.py**
+```python
+from flask import Flask, request, jsonify
+import whisper
+from azure.storage.blob import BlobServiceClient
+from datetime import datetime
+import xml.etree.ElementTree as ET
+
+app = Flask(__name__)
+
+@app.route('/generate', methods=['POST'])
+def generate_minutes():
+    try:
+        # Extract audio file ID from request body
+        audio_file_id = request.json.get('audioFileId')
+        
+        # Initialize Whisper model
+        model = whisper.load_model("base")
+        
+        # Transcribe audio file
+        result = model.transcribe(f"media/{audio_file_id}.mp3", fp16=False)
+        
+        # Process transcription
+        text = result["text"]
+        
+        # Summarize text using large language model
+        summary = summarize(text)
+        
+        # Extract action items
+        actions = extract_actions(summary)
+        
+        # Convert to XML format
+        root = create_xml_tree(actions)
+        
+        return jsonify(root), 200
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def summarize(text):
+    # Placeholder for actual summarization function
+    return "The meeting was productive."
+
+def extract_actions(summary):
+    # Placeholder for actual action extraction function
+    return ["Document finalized within next week"]
+
+def create_xml_tree(actions):
+    # Placeholder for actual XML tree creation function
+    return ET.ElementTree(ET.SubElement(ET.Element("Minutes"), "Meeting"))
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```
+
+---
+
+**FILE: voice_meeting_generator/backend/models.py**
+```python
+class AudioFile(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    filename = models.CharField(max_length=250, unique=True)
+    content_type = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.filename
+
+class Summary(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.text[:50]}..."
+
+class Action(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    summary = models.ForeignKey(Summary, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    description = models.TextField()
+
+    def __str__(self):
+        return f"{self.summary} - {self.timestamp}"
+
+class Minute(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    summary = models.ForeignKey(Summary, on_delete=models.CASCADE)
+    date = models.DateField()
+    participants = models.TextField()
+    xml_content = models.TextField()
+    csv_content = models.TextField()
+
+    def __str__(self):
+        return f"Generated Minute for {self.date}"
+```
+
+---
+
+**FILE: voice_meeting_generator/frontend/src/components/UploadButton.js**
+```javascript
+import React from 'react';
+
+const UploadButton = ({ onClick }) => (
+    <button type="submit" className="btn btn-primary mb-2">
+        Upload Audio File
+    </button>
+);
+
+export default UploadButton;
+```
+
+---
+
+**FILE: voice_meeting_generator/frontend/src/App.js**
+```javascript
+import React, { useState } from 'react';
+import axios from 'axios';
+import './App.css';
+import UploadButton from './components/UploadButton';
+
+function App() {
+    const [audioFileId, setAudioFileId] = useState('');
+    const [uploading, setUploading] = useState(false);
+    
+    const handleUpload = async () => {
+        setUploading(true);
+        try {
+            // Simulate uploading to Azure Blob Storage
+            await axios.post('https://your-azure-blob-service-url/upload', { fileId: audioFileId });
+            console.log('Audio file uploaded successfully');
+            setUploading(false);
+        } catch (err) {
+            console.error(err);
+            setUploading(false);
+        }
+    };
+
+    return (
+        <div className="container mt-5">
+            <h1>Voice-Based Meeting Minutes Generator</h1>
+            <UploadButton onClick={handleUpload} />
+            {!uploading && <p>Uploading... Please wait.</p>}
+        </div>
+    );
+}
+
+export default App;
+```
+
+---
+
+**FILE: voice_meeting_generator/config/production.config.js**
+```javascript
+module.exports = {
+    db: {
+        connectionString: process.env.DATABASE_URL,
+        poolSize: 5,
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    },
+};
+```
+
+---
+
+**FILE: voice_meeting_generator/settings.py**
+```python
+import os
+
+class Config:
+    SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
+
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///db.sqlite3')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    @property
+    def SQLALCHEMY_DATABASE_URI(self):
+        return self._SQLALCHEMY_DATABASE_URI.format(**os.environ)
+
+    WHISPER_API_ENDPOINT = os.getenv('WHISPER_API_ENDPOINT', 'http://localhost:7865/transcribe')
+    AZURE_STORAGE_ACCOUNT_NAME = os.getenv('AZURE_STORAGE_ACCOUNT_NAME', 'your_storage_account_name')
+    AZURE_STORAGE_ACCESS_KEY = os.getenv('AZURE_STORAGE_ACCESS_KEY', 'your_storage_access_key')
+    AZURE_CONTAINER = os.getenv('AZURE_CONTAINER', 'audio_files')
+```
+
+---
+
+**FILE: voice_meeting_generator/utils/utils.py**
+```python
+import uuid
+from datetime import datetime
+
+def get_current_time():
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+def generate_uuid():
+    return str(uuid.uuid4())
+```
+
+---
+
+**FILE: voice_meeting_generator/views.py**
+```python
+from flask import Blueprint, render_template, redirect, url_for, flash, abort
+from werkzeug.utils import secure_filename
+from .models import AudioFile, Summary, Action, Minute
+from .forms import UploadForm
+from ..config import db
+from ..utils import generate_uuid
+
+bp = Blueprint('voice_meeting_generator', __name__, template_folder='templates')
+
+@bp.route('/', methods=('GET', 'POST'))
+def index():
+    if request.method == 'POST':
+        form = UploadForm(request.form)
+        if form.validate_on_submit():
+            audio_file = AudioFile(filename=form.audio_file.data.filename)
+            db.session.add(audio_file)
+            db.session.commit()
+            flash('Audio file uploaded successfully.', 'success')
+            return redirect(url_for('.index'))
+
+    else:
+        form = UploadForm()
+
+    return render_template('index.html', form=form)
+
+@bp.route('/transcript/<audio_file_id>')
+def transcript(audio_file_id):
+    audio_file = AudioFile.query.filter_by(id=audio_file_id).first_or_404()
+    blob_service_client = BlobServiceClient.from_connection_string(Config.SQLALCHEMY_DATABASE_URI)
+    container_client = blob_service_client.get_container_client(Config.AZURE_CONTAINER)
+    blob_client = container_client.get_blob_client(blob=f'{audio_file_id}.mp3')
+    download_stream = blob_client.download_blob()
+    return download_stream.readall(), 200
+
+@bp.route('/minutes/<summary_id>')
+def minutes(summary_id):
+    summary = Summary.query.filter_by(id=summary_id).first_or_404()
+    blob_service_client = BlobServiceClient.from_connection_string(Config.SQLALCHEMY_DATABASE_URI)
+    container_client = blob_service_client.get_container_client(Config.AZURE_CONTAINER)
+    blob_client = container_client.get_blob_client(blob=f'{summary_id}.xml')
+    xml_content = blob_client.download_blob().readall()
+    blob_client = container_client.get_blob_client(blob=f'{summary_id}.csv')
+    csv_content = blob_client.download_blob().readall()
+    return {'xml': xml_content.decode('utf-8'), 'csv': csv_content.decode('utf-8')}, 200
+```
+
+---
+
+**FILE: voice_meeting_generator/templates/index.html**
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Voice-Based Meeting Minutes Generator</title>
+</head>
+<body>
+    <form method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <label for="{{ form.audio_file.id }}">Upload Audio File:</label><br>
+        <input type="file" name="{{ form.audio_file.name }}" id="{{ form.audio_file.id }}"><br><br>
+        <input type="submit" value="Upload">
+    </form>
+    {% if uploading %}
+        <p>Uploading...</p>
+    {% endif %}
+</body>
+</html>
+```
+
+---
+
+**FILE: voice_meeting_generator/__init__.py**
+```python
+from .views import bp as views_bp
+from .models import db as db_init
+
+def init_app(app):
+    app.register_blueprint(views_bp)
+    db_init.app = app
+    db_init.init_app(app)
+
+def configure_logging(app):
+    handler = RotatingFileHandler(
+        '/var/log/voice_meeting_generator/app.log',
+        maxBytes=100 * 1024 * 1024,  # 100 MB
+        backupCount=5
+    )
+    formatter = Formatter("%(asctime)s %(levelname)-8s %(message)s", "%b %d %H:%M:%S")
+    handler.setFormatter(formatter)
+    app.logger.addHandler(handler)
+    app.logger.setLevel(logging.INFO)
+
+def configure_db(app):
+    db_init.app = app
+    db_init.init

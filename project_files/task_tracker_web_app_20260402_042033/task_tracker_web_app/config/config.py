@@ -1,0 +1,1 @@
+# Configuration file for the project (not used in frontend, included as per folder structure)

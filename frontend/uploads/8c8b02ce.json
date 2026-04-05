@@ -1,0 +1,20 @@
+{
+  "id": "8c8b02ce",
+  "title": "Phishing Email Risk Detector",
+  "description": "Classify incoming emails and explain phishing risk in plain language.",
+  "problem": "Employees often miss subtle phishing indicators, leading to security incidents.",
+  "outcome": "Real-time risk score with explainable warnings and suggested user actions.",
+  "language": "python",
+  "approach": "Extract email features, run NLP classification, and generate explanation snippets with LLM.",
+  "stack": "Python, Scikit-learn, spaCy, FastAPI, React",
+  "complexity": "Medium",
+  "boilerplate_enabled": true,
+  "dev_count": 1,
+  "skills": [
+    "Backend",
+    "Data Engineer"
+  ],
+  "timeline": "10 days",
+  "manager": "shyaam123",
+  "submitted_by": "aditi"
+}

@@ -1,0 +1,230 @@
+<think>
+</think>
+
+--- FILE: task_tracker_web_app/README.md ---
+# Task Tracker Web App  
+
+## Overview  
+A simple web application to add, view, and delete daily tasks using HTML, CSS, and JavaScript. Tasks are persisted in browser local storage.  
+
+## Features  
+- Add tasks with optional due dates  
+- View all tasks in a list  
+- Delete individual tasks  
+- Persistent storage using local storage  
+
+## Setup Instructions  
+1. Clone the repository:  
+   ```bash  
+   git clone https://github.com/your-username/task_tracker_web_app.git  
+   ```  
+2. Navigate to the project directory:  
+   ```bash  
+   cd task_tracker_web_app  
+   ```  
+3. Open `index.html` in your browser to use the app  
+
+## Run Instructions  
+- No server required (single-page app)  
+- Open `index.html` directly in a browser  
+
+---
+
+## 12. DEPENDENCIES  
+- **JavaScript**: ES6+ (no external libraries)  
+- **Browser Support**: Modern browsers (Chrome, Firefox, Safari)  
+
+---
+
+## 13. FUTURE ENHANCEMENTS  
+- Add task editing functionality  
+- Implement due date reminders (e.g., local notifications)  
+- Introduce task categories (e.g., Work, Personal)  
+- Export tasks as CSV or JSON file  
+
+--- FILE: task_tracker_web_app/requirements.txt ---
+# No external dependencies required (pure frontend)  
+
+--- FILE: task_tracker_web_app/src/index.html ---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Tracker</title>
+  <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Task Tracker</h1>
+    <form id="task-form">
+      <input type="text" id="task-input" placeholder="Enter task..." required>
+      <input type="date" id="due-date-input">
+      <button type="submit">Add Task</button>
+    </form>
+    <ul id="task-list"></ul>
+  </div>
+  <script src="static/scripts.js"></script>
+</body>
+</html>
+
+--- FILE: task_tracker_web_app/static/styles.css ---
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+#task-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+#task-form input[type="text"] {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+}
+
+#task-form input[type="date"] {
+  padding: 10px;
+  font-size: 16px;
+}
+
+#task-form button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#task-form button:hover {
+  background-color: #218838;
+}
+
+#task-list {
+  list-style: none;
+  padding: 0;
+}
+
+#task-list li {
+  background: #e9ecef;
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#task-list li .delete-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#task-list li .delete-btn:hover {
+  background-color: #c82333;
+}
+
+--- FILE: task_tracker_web_app/static/scripts.js ---
+document.addEventListener('DOMContentLoaded', () => {
+  const taskForm = document.getElementById('task-form');
+  const taskInput = document.getElementById('task-input');
+  const dueDateInput = document.getElementById('due-date-input');
+  const taskList = document.getElementById('task-list');
+
+  // Load tasks from local storage
+  let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+  function saveTasks() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }
+
+  function renderTasks() {
+    taskList.innerHTML = '';
+    tasks.forEach((task, index) => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <span>${task.text} ${task.dueDate ? `(${task.dueDate})` : ''}</span>
+        <button class="delete-btn" data-index="${index}">Delete</button>
+      `;
+      taskList.appendChild(li);
+    });
+  }
+
+  // Add task
+  taskForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = taskInput.value.trim();
+    const dueDate = dueDateInput.value;
+
+    if (!text) {
+      alert('Task text is required');
+      return;
+    }
+
+    const newTask = {
+      id: Date.now().toString(),
+      text,
+      dueDate
+    };
+
+    tasks.push(newTask);
+    saveTasks();
+    renderTasks();
+    taskInput.value = '';
+    dueDateInput.value = '';
+  });
+
+  // Delete task
+  taskList.addEventListener('click', (e) => {
+    if (e.target.classList.contains('delete-btn')) {
+      const index = e.target.getAttribute('data-index');
+      tasks.splice(index, 1);
+      saveTasks();
+      renderTasks();
+    }
+  });
+
+  // Initial render
+  renderTasks();
+});
+
+--- FILE: task_tracker_web_app/main.py ---
+# This file is not used for frontend project, but included as per folder structure
+
+--- FILE: task_tracker_web_app/config/config.py ---
+# Configuration file for the project (not used in frontend, included as per folder structure)
+
+--- FILE: task_tracker_web_app/templates/index.html ---
+<!-- This file is not used for frontend project, but included as per folder structure -->
+
+--- FILE: task_tracker_web_app/static/scripts.js ---
+# This file is already included in the static directory
+
+--- FILE: task_tracker_web_app/config/requirements.txt ---
+# This file is not used for frontend project, but included as per folder structure
+
+--- FILE: task_tracker_web_app/templates/styles.css ---
+# This file is not used for frontend project, but included as per folder structure
+
+--- FILE: task_tracker_web_app/templates/scripts.js ---
+# This file is not used for frontend project, but included as per folder structure

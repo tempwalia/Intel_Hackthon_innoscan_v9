@@ -1,0 +1,17 @@
+{
+  "id": "poc_003",
+  "title": "AI‑Powered Log Anomaly & Root Cause Detector",
+  "description": "Automatically detect anomalies in application logs and suggest probable root causes.",
+  "problem": "Teams manually scan massive log files during incidents, causing delayed resolution.",
+  "outcome": "Faster incident detection with AI‑generated anomaly insights and root‑cause hints.",
+  "language": "Python",
+  "approach": "Ingest logs, generate embeddings, detect anomalies using ML, and summarize patterns using an LLM.",
+  "stack": "Python, OpenAI/Azure OpenAI, FAISS, Pandas, Streamlit",
+  "complexity": "Medium",
+  "boilerplate_enabled": false,
+  "dev_count": 1,
+  "skills": ["Backend Engineer", "Data Engineer"],
+  "timeline": "8",
+  "manager": "ram",
+  "submitted_by": "himanshu"
+}

@@ -1,0 +1,27 @@
+```json
+{
+  "name": "intelligent-ticket-classifier",
+  "version": "1.0.0",
+  "description": "Intelligent Ticket Classifier Frontend",
+  "main": "index.js",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "axios": "^1.6.2",
+    "bootstrap": "^5.3.2",
+    "jquery": "^3.7.1",
+    "popper.js": "^2.11.8"
+  },
+  "devDependencies": {
+    "react-scripts": "5.0.1"
+  }
+}
+```
+
+---

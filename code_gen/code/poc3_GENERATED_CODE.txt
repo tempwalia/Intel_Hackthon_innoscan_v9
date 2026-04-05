@@ -1,0 +1,289 @@
+<think>
+</think>
+
+--- FILE: document_rag_search_assistant/requirements.txt ---
+langchain==0.0.231
+azure-ai-search==12.1.0
+streamlit==1.26.0
+openai==1.0.0
+pandas==1.5.3
+PyPDF2==3.0.1
+python-dotenv==0.21.1
+flask==3.0.0
+gunicorn==21.2.0
+uvicorn==0.21.1
+fastapi==0.105.0
+azure-storage-blob==12.14.0
+azure-cognitiveservices-search==1.0.0
+numpy==1.24.3
+scikit-learn==1.3.2
+tqdm==4.66.1
+--- FILE: document_rag_search_assistant/README.md ---
+# Document RAG Search Assistant
+
+## Overview
+This project implements a Retrieval-Augmented Generation (RAG) chatbot that helps users find information in enterprise documents. It uses Azure AI Search for vector storage and retrieval, and LangChain for building the RAG pipeline.
+
+## Features
+- Chat interface for document search
+- RAG-based answer generation
+- Vector DB for document embeddings
+- Error handling and rate limiting
+
+## Setup Instructions
+1. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+2. Set environment variables:
+```bash
+export AZURE_SEARCH_ENDPOINT="your-endpoint"
+export AZURE_SEARCH_KEY="your-key"
+export OPENAI_API_KEY="your-openai-key"
+```
+
+3. Run the application:
+```bash
+streamlit run app.py
+```
+
+## API Endpoints
+- `POST /search`: Search documents using natural language queries
+
+## Contributing
+To contribute, please fork the repository and submit a pull request with your changes.
+
+--- FILE: document_rag_search_assistant/config/settings.py ---
+import os
+
+# Azure AI Search Configuration
+AZURE_SEARCH_ENDPOINT = os.getenv("AZURE_SEARCH_ENDPOINT")
+AZURE_SEARCH_KEY = os.getenv("AZURE_SEARCH_KEY")
+
+# OpenAI Configuration
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
+# Document Processing
+MAX_DOCUMENT_SIZE = 5 * 1024 * 1024  # 5MB
+MAX_CHUNK_SIZE = 500  # Tokens
+
+# Application Configuration
+APP_NAME = "Document RAG Search Assistant"
+APP_VERSION = "1.0.0"
+LOG_LEVEL = "INFO"
+MAX_CONCURRENT_USERS = 100
+RATE_LIMIT = 100  # Requests per minute
+
+# Vector DB Configuration
+VECTOR_DB_NAME = "document-index"
+VECTOR_DIMENSION = 1536  # Based on OpenAI embedding model
+
+# Streamlit Configuration
+STREAMLIT_PORT = 8501
+STREAMLIT_DEBUG = False
+
+# Error Handling
+MAX_RETRIES = 3
+RETRY_DELAY = 10  # Seconds
+
+--- FILE: document_rag_search_assistant/config/logger.py ---
+import logging
+from logging.handlers import RotatingFileHandler
+
+def setup_logger():
+    logger = logging.getLogger("document_rag_search_assistant")
+    logger.setLevel(config.LOG_LEVEL)
+
+    # Console handler
+    ch = logging.StreamHandler()
+    ch.setLevel(config.LOG_LEVEL)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+
+    # File handler
+    fh = RotatingFileHandler('logs/app.log', maxBytes=1024*1024*5, backupCount=3)
+    fh.setLevel(config.LOG_LEVEL)
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+
+    return logger
+
+--- FILE: document_rag_search_assistant/models/document.py ---
+import os
+import PyPDF2
+import docx
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import AzureSearch
+
+class DocumentProcessor:
+    def __init__(self):
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=config.MAX_CHUNK_SIZE,
+            chunk_overlap=0
+        )
+        self.embeddings = OpenAIEmbeddings(openai_api_key=config.OPENAI_API_KEY)
+        self.vector_db = AzureSearch(
+            azure_search_endpoint=config.AZURE_SEARCH_ENDPOINT,
+            azure_search_key=config.AZURE_SEARCH_KEY,
+            index_name=config.VECTOR_DB_NAME,
+            embedding_function=self.embeddings.embed_query
+        )
+
+    def process_document(self, file_path):
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"Document not found: {file_path}")
+
+        if file_path.endswith(".pdf"):
+            text = self._extract_text_from_pdf(file_path)
+        elif file_path.endswith(".docx"):
+            text = self._extract_text_from_docx(file_path)
+        else:
+            raise ValueError(f"Unsupported document format: {file_path}")
+
+        chunks = self.text_splitter.split_text(text)
+        self._store_embeddings(chunks, file_path)
+
+    def _extract_text_from_pdf(self, file_path):
+        with open(file_path, "rb") as file:
+            reader = PyPDF2.PdfReader(file)
+            return "\n".join(page.extract_text() for page in reader.pages)
+
+    def _extract_text_from_docx(self, file_path):
+        doc = docx.Document(file_path)
+        return "\n".join(paragraph.text for paragraph in doc.paragraphs)
+
+    def _store_embeddings(self, chunks, document_id):
+        if not chunks:
+            return
+
+        vectors = [self.embeddings.embed_query(chunk) for chunk in chunks]
+        self.vector_db.add_texts(chunks, vectors, metadatas=[{"source": document_id}]*len(chunks))
+
+--- FILE: document_rag_search_assistant/models/rag_engine.py ---
+from langchain.chains import RetrievalQA
+from langchain.chat_models import AzureChatOpenAI
+from langchain.prompts import PromptTemplate
+from langchain.vectorstores import AzureSearch
+
+class RAGEngine:
+    def __init__(self):
+        self.llm = AzureChatOpenAI(
+            deployment_name="gpt-35-turbo",
+            api_key=config.OPENAI_API_KEY,
+            azure_endpoint=config.AZURE_SEARCH_ENDPOINT,
+            api_version="2023-06-01-preview"
+        )
+        self.retriever = AzureSearch(
+            azure_search_endpoint=config.AZURE_SEARCH_ENDPOINT,
+            azure_search_key=config.AZURE_SEARCH_KEY,
+            index_name=config.VECTOR_DB_NAME
+        ).as_retriever(search_type="similarity", search_kwargs={"k": 5})
+
+        self.prompt_template = PromptTemplate(
+            input_variables=["question", "context"],
+            template="""Use the following context to answer the question:
+{context}
+
+Question: {question}
+Answer:
+"""
+        )
+
+    def generate_answer(self, query):
+        qa_chain = RetrievalQA.from_chain_type(
+            self.llm,
+            retriever=self.retriever,
+            chain_type_kwargs={"prompt": self.prompt_template}
+        )
+        result = qa_chain({"query": query})
+        return {
+            "answer": result["answer"],
+            "sources": [doc.metadata["source"] for doc in result["source_documents"]]
+        }
+
+--- FILE: document_rag_search_assistant/models/api.py ---
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import logging
+from config.logger import setup_logger
+from models.rag_engine import RAGEngine
+
+app = FastAPI()
+logger = setup_logger()
+rag_engine = RAGEngine()
+
+class SearchRequest(BaseModel):
+    query: str
+
+@app.post("/search")
+async def search(request: SearchRequest):
+    if len(request.query) > 500:
+        raise HTTPException(status_code=400, detail="Query exceeds 500 characters limit")
+    
+    try:
+        result = rag_engine.generate_answer(request.query)
+        logger.info(f"Search completed: {request.query}")
+        return result
+    except Exception as e:
+        logger.error(f"Search failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+--- FILE: document_rag_search_assistant/app.py ---
+import streamlit as st
+from models.rag_engine import RAGEngine
+from models.document import DocumentProcessor
+from config.settings import config
+import os
+import logging
+from config.logger import setup_logger
+
+logger = setup_logger()
+
+st.set_page_config(page_title="Document RAG Search Assistant", layout="wide")
+
+def main():
+    st.title("Document RAG Search Assistant")
+    st.markdown("Search for information in enterprise documents using AI-powered retrieval and generation.")
+
+    rag_engine = RAGEngine()
+    processor = DocumentProcessor()
+
+    with st.form("search_form"):
+        query = st.text_input("Enter your question", placeholder="What is the company's tax policy?")
+        submitted = st.form_submit_button("Search")
+
+        if submitted:
+            if not query:
+                st.error("Please enter a query")
+            else:
+                try:
+                    result = rag_engine.generate_answer(query)
+                    st.success("Found the following answer:")
+                    st.write(result["answer"])
+                    st.markdown("### Sources:")
+                    for source in result["sources"]:
+                        st.markdown(f"- [{source}]({source})")
+                except Exception as e:
+                    st.error(f"Error: {str(e)}")
+                    logger.error(f"Search failed: {str(e)}")
+
+    st.markdown("---")
+    st.markdown("### Upload Documents")
+    uploaded_files = st.file_uploader("Choose PDF/DOCX files", accept_multiple_files=True, type=["pdf", "docx"])
+
+    if uploaded_files:
+        for file in uploaded_files:
+            file_path = os.path.join("documents", file.name)
+            with open(file_path, "wb") as f:
+                f.write(file.getbuffer())
+            try:
+                processor.process_document(file_path)
+                st.success(f"Processed {file.name}")
+            except Exception as e:
+                st.error(f"Error processing {file.name}: {str(e)}")
+
+if __name__ == "__main__":
+    main()

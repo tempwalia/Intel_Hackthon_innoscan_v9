@@ -1,0 +1,16 @@
+2026-04-04 12:45:26,220 | INFO | 1769 | MainThread | ✅ Code generator loaded successfully
+2026-04-04 12:45:47,200 | INFO | 1769 | MainThread | ✅ POCRetriever initialized successfully
+2026-04-04 12:45:50,612 | INFO | 1769 | MainThread | ✅ Embeddings model loaded for ingestion
+2026-04-04 12:57:07,475 | INFO | 1769 | Thread-9 (process_request_thread) | [START] Similarity search started for title='AI‑Powered Log Anomaly & Root Cause Detector'
+2026-04-04 12:57:08,990 | INFO | 1769 | Thread-9 (process_request_thread) | [DONE] Similarity search completed. Matches found: 0
+2026-04-04 12:57:08,992 | INFO | 1769 | Thread-9 (process_request_thread) | [INGEST] Starting Pinecone ingestion for POC d355d5df
+2026-04-04 12:57:12,236 | INFO | 1769 | Thread-9 (process_request_thread) | ✅ POC ingested to Pinecone (POC ID: d355d5df, 3 chunks)
+2026-04-04 12:57:12,238 | INFO | 1769 | Thread-18 (_generate) | [SRS] Boilerplate enabled=True for POC d355d5df
+2026-04-04 12:57:12,239 | INFO | 1769 | Thread-18 (_generate) | [SRS] Generating SRS for POC d355d5df
+2026-04-04 13:00:59,843 | INFO | 1769 | Thread-18 (_generate) | [SRS] Generation result success=True, output=/home/labuser/Downloads/intel-hackathon-v8-main/frontend/services/../../srs_gen/srs/d355d5df_SRS.md
+2026-04-04 13:00:59,845 | INFO | 1769 | Thread-18 (_generate) | ✅ ✅ SRS generated: d355d5df_SRS.md
+2026-04-04 13:00:59,845 | INFO | 1769 | Thread-18 (_generate) | [SRS] File saved: /home/labuser/Downloads/intel-hackathon-v8-main/frontend/services/../../srs_gen/srs/d355d5df_SRS.md
+2026-04-04 13:00:59,846 | INFO | 1769 | Thread-18 (_generate) | [CODE] Triggering boilerplate code generation for POC d355d5df
+2026-04-04 13:00:59,847 | INFO | 1769 | Thread-19 (_generate) | [CODE] Generating boilerplate code for POC d355d5df
+2026-04-04 13:06:54,772 | INFO | 1769 | Thread-19 (_generate) | ✅ ✅ Code generated successfully
+2026-04-04 13:06:54,772 | INFO | 1769 | Thread-19 (_generate) | [CODE] File saved: /home/labuser/Downloads/intel-hackathon-v8-main/frontend/services/../../code_gen/code/d355d5df_GENERATED_CODE.txt
